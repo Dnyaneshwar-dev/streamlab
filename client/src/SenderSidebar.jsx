@@ -13,7 +13,7 @@ import ScreenSearchDesktopOutlinedIcon from '@mui/icons-material/ScreenSearchDes
 import LinkedCameraOutlinedIcon from '@mui/icons-material/LinkedCameraOutlined';
 import Box from '@mui/material/Box'
 
-const Sidebar = (props) => {
+const SenderSidebar = (props) => {
 
     return (
         <>
@@ -66,4 +66,4 @@ const Sidebar = (props) => {
     )
 }
 
-export default Sidebar
+export default SenderSidebar

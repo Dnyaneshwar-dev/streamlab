@@ -1,5 +1,5 @@
 import React from 'react'
-import Sidebar from './Sidebar';
+import SenderSidebar from './SenderSidebar';
 import { Container, Box } from '@mui/material';
 import { useEffect } from 'react'
 import { useRef } from 'react';
@@ -18,11 +18,8 @@ const Sender = () => {
            // const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
             videoRef.current.srcObject = stream
 
-            dispatch({type:VIDEOSTREAM,stream:15})
-            dispatch({type:VIDEOSTREAM,stream:15})
-            dispatch({type:VIDEOSTREAM,stream:15})
-            dispatch({type:VIDEOSTREAM,stream:15})
-            
+            dispatch({type:VIDEOSTREAM,data:stream})
+           
 
             const peer = createPeer()
 
@@ -66,7 +63,7 @@ const Sender = () => {
     return (
         <div>
 
-            <Sidebar open="false" />
+            <SenderSidebar open="false" />
 
             <video ref={videoRef} id="video" autoPlay={true} muted/>
 

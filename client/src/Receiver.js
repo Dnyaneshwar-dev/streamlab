@@ -1,5 +1,5 @@
 import React from 'react'
-import Sidebar from './Sidebar';
+import Sidebar from './SenderSidebar';
 import { Container, Box } from '@mui/material';
 import { useEffect } from 'react'
 import { useRef } from 'react';

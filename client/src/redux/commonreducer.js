@@ -1,16 +1,16 @@
 import { VIDEOSTREAM, SCREENSTREAM } from "./actions";
 
 const initialState = {
-    videostream:0,
-    screenstream:0
+    videostream:null,
+    screenstream:null
 }
 
-const commonReducer = (state = initialState, action, stream,...rest) => {
-    switch(action){
+const commonReducer = (state = initialState,{type, data}) => {
+    switch(type){
         case VIDEOSTREAM:
-            return {...state,videostream:stream };
+            return {...state,videostream:data };
         case SCREENSTREAM:
-            return {...state,screenstream:stream};
+            return {...state,screenstream:data};
         default:
             return state;
     }
