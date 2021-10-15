@@ -1,5 +1,5 @@
 import React from 'react'
-import Sidebar from './SenderSidebar';
+import ReceiverSidebar from './ReceiverSidebar';
 import { Container, Box } from '@mui/material';
 import { useEffect } from 'react'
 import { useRef } from 'react';
@@ -60,7 +60,7 @@ const Sender = () => {
     return (
         <div>
 
-            <Sidebar open="false" />
+            <ReceiverSidebar open="false" />
 
             <video ref={senderVideo} autoPlay={true} />
 

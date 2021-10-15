@@ -12,8 +12,26 @@ import Container from '@mui/material/Container';
 import ScreenSearchDesktopOutlinedIcon from '@mui/icons-material/ScreenSearchDesktopOutlined';
 import LinkedCameraOutlinedIcon from '@mui/icons-material/LinkedCameraOutlined';
 import Box from '@mui/material/Box'
+import MicNoneIcon from '@mui/icons-material/MicNone';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
+import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
+import { useEffect } from 'react'
+import { store } from './redux/store'
 
 const SenderSidebar = (props) => {
+
+    const handleMic = (stream) =>{
+        stream.getAudioTracks()[0].enabled = !(stream.getAudioTracks()[0].enabled);
+    }
+
+    const handleVideo = (stream) =>{
+        stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
+    }
+    useEffect(()=>{
+        
+    },[])
 
     return (
         <>
@@ -51,13 +69,27 @@ const SenderSidebar = (props) => {
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
 
                         <Button>
-                            <ScreenSearchDesktopOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
+                            <ScreenShareOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
                     </Box>
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
 
-                        <Button>
-                            <LinkedCameraOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
+                        <Button onClick={()=>{
+                            const stream = store.getState().commonReducer.videostream
+                            console.log(stream);
+                            handleMic(stream)
+                        }}>
+                            <MicNoneIcon sx={{ color: "black", fontSize: 35 }} />
+                        </Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
+
+                        <Button onClick={()=>{
+                            const stream = store.getState().commonReducer.videostream
+                            console.log(stream);
+                            handleVideo(stream)
+                        }}>
+                            <VideocamOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
                     </Box>
                 </Stack>

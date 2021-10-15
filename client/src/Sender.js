@@ -4,37 +4,35 @@ import { Container, Box } from '@mui/material';
 import { useEffect } from 'react'
 import { useRef } from 'react';
 import axios from 'axios'
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { VIDEOSTREAM } from './redux/actions';
 
 const Sender = () => {
-    const videoRef = useRef(null)
+    const videoRef = useRef()
     const dispatch = useDispatch()
-    
+
     useEffect(() => {
         const getMedia = async () => {
 
-            const stream = await navigator.mediaDevices.getUserMedia({ video:true , audio:true})
-           // const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            // const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
             videoRef.current.srcObject = stream
 
-            dispatch({type:VIDEOSTREAM,data:stream})
-           
-
+            dispatch({ type: VIDEOSTREAM, data: stream })
             const peer = createPeer()
 
-            stream.getTracks().forEach(track => peer.addTrack(track,stream))
+            stream.getTracks().forEach(track => peer.addTrack(track, stream))
 
             function createPeer() {
                 const peer = new RTCPeerConnection({
                     iceServers: [
                         {
-                            urls: ["stun:stun.stunprotocol.org","stun:stun1.faktortel.com.au:3478",
-                "stun:stun1.l.google.com:19302",
-                "stun:stun1.voiceeclipse.net:3478",
-                "stun:stun2.l.google.com:19302",
-                "stun:stun3.l.google.com:19302",
-                "stun:stun4.l.google.com:19302"]
+                            urls: ["stun:stun.stunprotocol.org", "stun:stun1.faktortel.com.au:3478",
+                                "stun:stun1.l.google.com:19302",
+                                "stun:stun1.voiceeclipse.net:3478",
+                                "stun:stun2.l.google.com:19302",
+                                "stun:stun3.l.google.com:19302",
+                                "stun:stun4.l.google.com:19302"]
                         }
                     ]
                 });
@@ -56,7 +54,7 @@ const Sender = () => {
             }
         }
         getMedia()
-        
+
     }, [])
 
 
@@ -65,7 +63,11 @@ const Sender = () => {
 
             <SenderSidebar open="false" />
 
-            <video ref={videoRef} id="video" autoPlay={true} muted/>
+            <video ref={videoRef} id="video" autoPlay={true} muted />
+            
+           
+
+
 
         </div>
     );
