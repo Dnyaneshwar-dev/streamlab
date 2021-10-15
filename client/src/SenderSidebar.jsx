@@ -19,6 +19,8 @@ import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import { useEffect } from 'react'
 import { store } from './redux/store'
+import { useState } from 'react'
+
 
 const SenderSidebar = (props) => {
 
@@ -32,6 +34,9 @@ const SenderSidebar = (props) => {
     useEffect(()=>{
         
     },[])
+
+    const [video,toggleVideo] = useState(true)
+    const [mic,toggleMic] = useState(true)
 
     return (
         <>
@@ -78,8 +83,11 @@ const SenderSidebar = (props) => {
                             const stream = store.getState().commonReducer.videostream
                             console.log(stream);
                             handleMic(stream)
+                            toggleMic(!mic)
                         }}>
-                            <MicNoneIcon sx={{ color: "black", fontSize: 35 }} />
+                        {
+                            mic ? <MicNoneIcon sx={{ color: "red", fontSize: 35 }} />:<MicOffIcon sx={{ color: "black", fontSize: 35 }} />
+                        }  
                         </Button>
                     </Box>
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
@@ -88,8 +96,11 @@ const SenderSidebar = (props) => {
                             const stream = store.getState().commonReducer.videostream
                             console.log(stream);
                             handleVideo(stream)
+                            toggleVideo(!video)
                         }}>
-                            <VideocamOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
+                        {
+                            video ? <VideocamOutlinedIcon sx={{ color: "red", fontSize: 35 }} /> : <VideocamOffOutlinedIcon sx={{ color: "black", fontSize: 35 }}/>
+                        }
                         </Button>
                     </Box>
                 </Stack>
