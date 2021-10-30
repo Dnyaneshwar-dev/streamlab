@@ -12,9 +12,28 @@ import Container from '@mui/material/Container';
 import ScreenSearchDesktopOutlinedIcon from '@mui/icons-material/ScreenSearchDesktopOutlined';
 import LinkedCameraOutlinedIcon from '@mui/icons-material/LinkedCameraOutlined';
 import Box from '@mui/material/Box'
+import {Widget, addResponseMessage, addLinkSnippet, addUserMessage, setQuickButtons} from 'react-chat-widget';
+import { useEffect } from 'react'
+import { socket } from './socketConnection'
 
 const ReceiverSidebar = (props) => {
+    const handleNewUserMessage = newMessage => {
 
+        socket.emit('message', {message:newMessage, roomid:"abc"});
+
+        // console.log(`New message incoming! ${newMessage}`);
+        // Now send the message throught the backend API
+        // addResponseMessage('hi')
+    };
+
+    useEffect(()=>{
+       
+        socket.on('newmessage',({message})=>{
+            addResponseMessage(String(message))
+        })
+
+    },[])
+    
     return (
         <>
             <Drawer anchor='right' variant='permanent'
@@ -24,8 +43,9 @@ const ReceiverSidebar = (props) => {
                     '& .MuiDrawer-paper': {
                         width: 70,
                         boxSizing: 'border-box',
-                    }
+                    },
                 }}
+                className='side'
                 openSecondary={true}
                 open={props.open}
             >
@@ -59,6 +79,14 @@ const ReceiverSidebar = (props) => {
                         <Button>
                             <LinkedCameraOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
+                        <Widget
+                            handleNewUserMessage={handleNewUserMessage}
+                            title="Chat"
+                            subtitle=""
+                        />
                     </Box>
                 </Stack>
             </Drawer>

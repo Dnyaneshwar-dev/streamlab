@@ -7,6 +7,7 @@ import './App.css'
 import { Provider } from 'react-redux';
 
 import { HashRouter, Switch, Route, Router } from 'react-router-dom';
+import Chat from './Chat';
 
 
 
@@ -17,6 +18,7 @@ function App() {
       <Switch>
         <Route exact path='/host' component={Sender} />
         <Route exact path='/join' component={Receiver} />
+        <Route exact path='/chat' component={Chat}/>
         <Route component={() => <h1> Hello </h1>} />
       </Switch>
     </HashRouter>

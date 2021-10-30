@@ -17,12 +17,50 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
+import {Widget, addResponseMessage, addLinkSnippet, addUserMessage, setQuickButtons} from 'react-chat-widget';
+
 import { useEffect } from 'react'
 import { store } from './redux/store'
 import { useState } from 'react'
-
-
+import { socket } from './socketConnection'
+import config from './config'
 const SenderSidebar = (props) => {
+
+    const handleNewUserMessage = newMessage => {
+
+        socket.emit('message', {message:newMessage, roomid:"abc"});
+
+        // console.log(`New message incoming! ${newMessage}`);
+        // Now send the message throught the backend API
+        // addResponseMessage('hi')
+    };
+
+
+    let screenpeer
+    async function shareScreen(){
+        const screen = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+        
+        screenpeer = createPeer()
+
+        screen.getTracks().forEach(track => screenpeer.addTrack(track,screen))
+
+        function createPeer() {
+            const peer = new RTCPeerConnection(config);
+            peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer);
+
+            return peer;
+        }
+
+        async function handleNegotiationNeededEvent(peer) {
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            const payload = {
+                sdp: peer.localDescription
+            };
+            socket.emit('publishscreen',{roomid: "abc", payload:payload })
+            
+        }
+    }
 
     const handleMic = (stream) =>{
         stream.getAudioTracks()[0].enabled = !(stream.getAudioTracks()[0].enabled);
@@ -32,7 +70,16 @@ const SenderSidebar = (props) => {
         stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
     }
     useEffect(()=>{
-        
+        socket.on('screenoffer',(payload)=>{
+            console.log('screenoffer');
+            const desc = new RTCSessionDescription(payload.sdp);
+            screenpeer.setRemoteDescription(desc).catch(e => console.log(e));
+        })
+
+        socket.on('newmessage',({message})=>{
+            addResponseMessage(message)
+        })
+
     },[])
 
     const [video,toggleVideo] = useState(true)
@@ -73,7 +120,9 @@ const SenderSidebar = (props) => {
                     </Box>
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
 
-                        <Button>
+                        <Button onClick={()=>{
+                            shareScreen();
+                        }}>
                             <ScreenShareOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
                     </Box>
@@ -94,7 +143,7 @@ const SenderSidebar = (props) => {
 
                         <Button onClick={()=>{
                             const stream = store.getState().commonReducer.videostream
-                            console.log(stream);
+                            socket.emit('chat',{roomid:"abc",message:'mic'})
                             handleVideo(stream)
                             toggleVideo(!video)
                         }}>
@@ -102,6 +151,13 @@ const SenderSidebar = (props) => {
                             video ? <VideocamOutlinedIcon sx={{ color: "red", fontSize: 35 }} /> : <VideocamOffOutlinedIcon sx={{ color: "black", fontSize: 35 }}/>
                         }
                         </Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
+                        <Widget
+                            handleNewUserMessage={handleNewUserMessage}
+                            title="Chat"
+                            subtitle=""
+                        />
                     </Box>
                 </Stack>
             </Drawer>

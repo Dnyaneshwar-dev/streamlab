@@ -5,37 +5,33 @@ import { useEffect } from 'react'
 import { useRef } from 'react';
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux';
-import { VIDEOSTREAM } from './redux/actions';
+import { PAYLOAD, VIDEOSTREAM } from './redux/actions';
+import ReactPlayer from 'react-player' 
+import { store } from './redux/store'
+import config from './config';
+import { socket } from './socketConnection';
 
 const Sender = () => {
+
     const videoRef = useRef()
     const dispatch = useDispatch()
+    
 
     useEffect(() => {
+
+        let peer 
+
         const getMedia = async () => {
 
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            // const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
             videoRef.current.srcObject = stream
-
             dispatch({ type: VIDEOSTREAM, data: stream })
-            const peer = createPeer()
+            peer = createPeer()
 
-            stream.getTracks().forEach(track => peer.addTrack(track, stream))
-
+            stream.getTracks().forEach(track => peer.addTrack(track,stream))
+            
             function createPeer() {
-                const peer = new RTCPeerConnection({
-                    iceServers: [
-                        {
-                            urls: ["stun:stun.stunprotocol.org", "stun:stun1.faktortel.com.au:3478",
-                                "stun:stun1.l.google.com:19302",
-                                "stun:stun1.voiceeclipse.net:3478",
-                                "stun:stun2.l.google.com:19302",
-                                "stun:stun3.l.google.com:19302",
-                                "stun:stun4.l.google.com:19302"]
-                        }
-                    ]
-                });
+                const peer = new RTCPeerConnection(config);
                 peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer);
 
                 return peer;
@@ -47,13 +43,26 @@ const Sender = () => {
                 const payload = {
                     sdp: peer.localDescription
                 };
-
-                const { data } = await axios.post('http://localhost:5000/broadcast', payload);
-                const desc = new RTCSessionDescription(data.sdp);
-                peer.setRemoteDescription(desc).catch(e => console.log(e));
+                //const { data } = await axios.post('http://localhost:5000/broadcast', payload);
+                socket.emit('publishstream',{roomid: "abc", payload:payload })
+                
             }
         }
+
+        socket.emit('join','abc')
+
         getMedia()
+
+        socket.on('hi',(message)=>{
+            console.log(message);
+        })
+
+        socket.on('offer',(payload)=>{
+            console.log('offer');
+            const desc = new RTCSessionDescription(payload.sdp);
+            peer.setRemoteDescription(desc).catch(e => console.log(e));
+        })
+       
 
     }, [])
 
@@ -63,12 +72,9 @@ const Sender = () => {
 
             <SenderSidebar open="false" />
 
-            <video ref={videoRef} id="video" autoPlay={true} muted />
-            
-           
+            <video ref={videoRef} id="video" autoPlay={true} muted controls={false} />
 
-
-
+    
         </div>
     );
 }
