@@ -10,14 +10,37 @@ import ReactPlayer from 'react-player'
 import { store } from './redux/store'
 import config from './config';
 import { socket } from './socketConnection';
-
+import { useHistory } from 'react-router-dom';
+import { Redirect } from "react-router-dom";
 const Sender = () => {
 
     const videoRef = useRef()
     const dispatch = useDispatch()
-    
+    const history = useHistory()
 
-    useEffect(() => {
+    useEffect(async() => {
+        
+        const p = new URLSearchParams(window.location.hash.substring(6))
+
+        const roomid = p.get('roomid')
+        const passcode = p.get('passcode')
+        const getToken = async () => {
+            const token = await axios.post('http://localhost:5000/auth', {
+                data: {
+                    roomid: String(roomid),
+                    passcode: String(passcode)
+                }
+            })
+            return token.data.status
+        }
+        
+        const token = await getToken()
+        console.log(token);
+        if (token == false) {
+            history.push('/')
+            return
+        }
+        socket.emit('join', roomid)
 
         let peer 
 
@@ -44,13 +67,10 @@ const Sender = () => {
                     sdp: peer.localDescription
                 };
                 //const { data } = await axios.post('http://localhost:5000/broadcast', payload);
-                socket.emit('publishstream',{roomid: "abc", payload:payload })
+                socket.emit('publishstream',{roomid: roomid, payload:payload })
                 
             }
         }
-
-        socket.emit('join','abc')
-
         getMedia()
 
         socket.on('hi',(message)=>{

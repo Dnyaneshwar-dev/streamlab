@@ -25,16 +25,19 @@ import { useState } from 'react'
 import { socket } from './socketConnection'
 import config from './config'
 const SenderSidebar = (props) => {
-
+    const p = new URLSearchParams(window.location.hash.substring(6))
+    const roomid = p.get('roomid')
+    const passcode = p.get('passcode')
     const handleNewUserMessage = newMessage => {
 
-        socket.emit('message', {message:newMessage, roomid:"abc"});
+        socket.emit('message', {message:newMessage, roomid:roomid});
 
         // console.log(`New message incoming! ${newMessage}`);
         // Now send the message throught the backend API
         // addResponseMessage('hi')
     };
 
+    
 
     let screenpeer
     async function shareScreen(){
@@ -57,7 +60,7 @@ const SenderSidebar = (props) => {
             const payload = {
                 sdp: peer.localDescription
             };
-            socket.emit('publishscreen',{roomid: "abc", payload:payload })
+            socket.emit('publishscreen',{roomid: roomid, payload:payload })
             
         }
     }

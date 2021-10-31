@@ -8,21 +8,44 @@ import { socket } from './socketConnection';
 import { Widget, addResponseMessage, addLinkSnippet, addUserMessage, setQuickButtons } from 'react-chat-widget';
 import config from './config';
 import 'react-chat-widget/lib/styles.css';
+import { useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 const Sender = () => {
+    const history = useHistory();
     const senderVideo = useRef(null)
     const [data, setLoad] = useState({})
     const senderScreen = useRef(null)
 
-   
 
-    useEffect(() => {
 
-        socket.emit('join', 'abc')
+
+    useEffect(async () => {
+        const p = new URLSearchParams(window.location.hash.substring(6))
+
+        const roomid = p.get('roomid')
+        const passcode = p.get('passcode')
+        const getToken = async () => {
+            const token = await axios.post('http://localhost:5000/auth', {
+                data: {
+                    roomid: String(roomid),
+                    passcode: String(passcode)
+                }
+            })
+            return token.data.status
+        }
+
+        const token = await getToken()
+        console.log(token);
+        if (token == false) {
+            history.push('/')
+            return
+        }
+        socket.emit('join', roomid)
 
         let peer
         let peer2
-        
+
 
         const setMedia = async () => {
 
@@ -52,7 +75,7 @@ const Sender = () => {
 
                 //const { data } = await axios.post('http://localhost:5000/consumer', payload);
                 //console.log('data',data);
-                socket.emit('getvideostream', { roomid: "abc", body: payload })
+                socket.emit('getvideostream', { roomid: roomid, body: payload })
 
                 //const desc = new RTCSessionDescription(data.sdp);
                 //peer.setRemoteDescription(desc).catch(e => console.log(e));
@@ -69,19 +92,7 @@ const Sender = () => {
             peer2.addTransceiver("audio", { direction: "recvonly" })
 
             function createPeer() {
-                const peer = new RTCPeerConnection({
-                    iceServers: [
-                        {
-                            urls: ["stun:stun.stunprotocol.org", "stun:stun1.faktortel.com.au:3478",
-                                "stun:stun1.l.google.com:19302",
-                                "stun:stun1.voiceeclipse.net:3478",
-                                "stun:stun2.l.google.com:19302",
-                                "stun:stun3.l.google.com:19302",
-                                "stun:stun4.l.google.com:19302"]
-
-                        }
-                    ]
-                });
+                const peer = new RTCPeerConnection(config);
                 peer.ontrack = handleTrackEvent;
                 peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer);
 
@@ -99,13 +110,13 @@ const Sender = () => {
                 const payload = {
                     sdp: peer.localDescription
                 };
-        
-                socket.emit('getscreen', { roomid: "abc", body: payload })
+
+                socket.emit('getscreen', { roomid: roomid, body: payload })
 
             }
 
         }
-        
+
         socket.on('hi', (message) => {
             console.log(message);
         })
@@ -130,7 +141,7 @@ const Sender = () => {
             setScreen()
         })
 
-        socket.on('videoalert',(e) =>{
+        socket.on('videoalert', (e) => {
 
         })
 

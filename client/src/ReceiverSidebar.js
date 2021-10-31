@@ -17,9 +17,12 @@ import { useEffect } from 'react'
 import { socket } from './socketConnection'
 
 const ReceiverSidebar = (props) => {
+    const p = new URLSearchParams(window.location.hash.substring(6))
+    const roomid = p.get('roomid')
+    
     const handleNewUserMessage = newMessage => {
 
-        socket.emit('message', {message:newMessage, roomid:"abc"});
+        socket.emit('message', {message:newMessage, roomid:roomid});
 
         // console.log(`New message incoming! ${newMessage}`);
         // Now send the message throught the backend API
