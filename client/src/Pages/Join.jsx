@@ -3,7 +3,7 @@ import './Auditorium.css';
 import Navbar from '../Components/Navbar'
 import meeting from '../images/meeting.svg'
 
-function Team() {
+function Join() {
   return (
     <section>
       <Navbar />
@@ -12,7 +12,7 @@ function Team() {
       <h2 className="text-center"> Join Class</h2>
 
           <div className="col-md-4 mt-5 mx-auto">
-          <form>
+          <form method="POST">
             <label>Meeting Code : </label>
             <input type="text" placeholder="Enter Meeting Code" name="roomid" required />
             <br></br><br></br>
@@ -32,4 +32,4 @@ function Team() {
   );
 }
 
-export default Team;
+export default Join;

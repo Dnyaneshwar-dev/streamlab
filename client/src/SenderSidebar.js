@@ -18,6 +18,7 @@ import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
 import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import {Widget, addResponseMessage, addLinkSnippet, addUserMessage, setQuickButtons} from 'react-chat-widget';
+import adapter from 'webrtc-adapter';
 
 import { useEffect } from 'react'
 import { store } from './redux/store'
@@ -73,10 +74,10 @@ const SenderSidebar = (props) => {
         stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
     }
     useEffect(()=>{
-        socket.on('screenoffer',(payload)=>{
+        socket.on('screenoffer',async(payload)=>{
             console.log('screenoffer');
             const desc = new RTCSessionDescription(payload.sdp);
-            screenpeer.setRemoteDescription(desc).catch(e => console.log(e));
+            await screenpeer.setRemoteDescription(desc).catch(e => console.log(e));
         })
 
         socket.on('newmessage',({message})=>{

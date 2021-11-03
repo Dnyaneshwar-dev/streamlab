@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import './Navbar.css';
 import { IconContext } from 'react-icons';
+import brand from '../brand.svg'
 
 function Navbar() {
   const [sidebar, setSidebar] = useState(false);
@@ -13,12 +14,15 @@ function Navbar() {
 
   return (
     <>
+    
       <IconContext.Provider value={{ color: '#000000' }}>
-        <div className='navbar'>
-          <Link to='#' className='menu-bars'>
-            <FaIcons.FaBars onClick={showSidebar} />
+        <div className='navbar bg-transparent'>
+          <Link to='#' className='menu-bars h-100'>
+            <FaIcons.FaBars onClick={showSidebar} height="100px"/>
           </Link>
+          <img src={brand} alt='brand' className='brand menu-bars' width="100px" height="70px" className=""/>
         </div>
+        
         <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
           <ul className='nav-menu-items' onClick={showSidebar}>
             <li className='navbar-toggle'>

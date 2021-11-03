@@ -2,11 +2,9 @@
 import React from 'react';
 import Receiver from './Receiver'
 import Sender from './Sender';
-import Lobby from './Pages/Lobby';
-import Auditorium from './Pages/Auditorium';
+import Create from './Pages/Create';
 import Join from './Pages/Join';
-import Messages from './Pages/Messages';
-
+import Home from './Pages/Home';
 import store from './redux/store';
 import './App.css'
 import { Provider } from 'react-redux';
@@ -23,10 +21,10 @@ function App() {
   return (
     <HashRouter>
       <Switch>
-        <Route path='/' exact component={Join} />
-        <Route path='/auditorium' component={Auditorium} />
-        <Route path='/join' component={Join} />
-        <Route path='/messages' component={Messages} />
+        <Route path='/' exact component={Home} />
+        <Route path='/create' component={Create} />
+        <Route path='/joinroom' component={Join} />
+
         <Route exact path='/host' component={Sender} />
         <Route exact path='/join' component={Receiver} />
         <Route exact path='/chat' component={Chat} />

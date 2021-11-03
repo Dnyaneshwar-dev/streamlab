@@ -10,8 +10,9 @@ import config from './config';
 import 'react-chat-widget/lib/styles.css';
 import { useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
+import adapter from 'webrtc-adapter';
 
-const Sender = () => {
+const Receiver = () => {
     const history = useHistory();
     const senderVideo = useRef(null)
     const [data, setLoad] = useState({})
@@ -20,27 +21,32 @@ const Sender = () => {
 
 
 
-    useEffect(async () => {
+    useEffect(() => {
         const p = new URLSearchParams(window.location.hash.substring(6))
 
         const roomid = p.get('roomid')
         const passcode = p.get('passcode')
+        console.log(roomid,passcode);
         const getToken = async () => {
             const token = await axios.post('http://localhost:5000/auth', {
-                data: {
-                    roomid: String(roomid),
-                    passcode: String(passcode)
-                }
+
+                roomid: String(roomid),
+                passcode: String(passcode)
+
             })
             return token.data.status
         }
-
-        const token = await getToken()
-        console.log(token);
-        if (token == false) {
-            history.push('/')
-            return
+        const auth = async() =>{
+            const token = await getToken()
+            console.log(token);
+            if (token == false) {
+                history.push('/')
+                return
+            }
         }
+
+        auth()
+        
         socket.emit('join', roomid)
 
         let peer
@@ -121,19 +127,22 @@ const Sender = () => {
             console.log(message);
         })
 
-        socket.on('videostream', (e) => {
+        socket.on('videostream', async(e) => {
             console.log('video');
             const desc = new RTCSessionDescription(e.payload.sdp);
-            peer.setRemoteDescription(desc).catch(e => console.log(e));
-
+            //await peer.setRemoteDescription(desc).catch(e => console.log(e));
+            setTimeout(async() => { await peer.setRemoteDescription(desc).catch(e => console.log(e));
+            }, 3000);
         })
 
-        socket.on('screenstream', (e) => {
+        socket.on('screenstream', async(e) => {
             console.log('screen')
 
             const desc = new RTCSessionDescription(e.payload.sdp);
-            peer2.setRemoteDescription(desc).catch(e => console.log(e));
 
+            setTimeout(async() => { await peer2.setRemoteDescription(desc).catch(e => console.log(e));
+            }, 3000);
+            
         })
 
         socket.on('screenalert', (e) => {
@@ -152,11 +161,11 @@ const Sender = () => {
 
             <ReceiverSidebar open="false" />
 
-            <video ref={senderVideo} autoPlay controls={true} />
-            <video ref={senderScreen} autoPlay controls={true} />
+            <video ref={senderVideo} autoPlay={true} muted={true} playsInline={true} controls={true} />
+            <video ref={senderScreen} autoPlay={true} muted={true} playsInline={true} controls={true} />
 
         </div>
     );
 }
 
-export default Sender
+export default Receiver

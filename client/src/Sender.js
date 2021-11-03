@@ -12,13 +12,15 @@ import config from './config';
 import { socket } from './socketConnection';
 import { useHistory } from 'react-router-dom';
 import { Redirect } from "react-router-dom";
+import adapter from 'webrtc-adapter';
+
 const Sender = () => {
 
     const videoRef = useRef()
     const dispatch = useDispatch()
     const history = useHistory()
 
-    useEffect(async() => {
+    useEffect(() => {
         
         const p = new URLSearchParams(window.location.hash.substring(6))
 
@@ -26,20 +28,24 @@ const Sender = () => {
         const passcode = p.get('passcode')
         const getToken = async () => {
             const token = await axios.post('http://localhost:5000/auth', {
-                data: {
-                    roomid: String(roomid),
-                    passcode: String(passcode)
-                }
+
+                roomid: String(roomid),
+                passcode: String(passcode)
+
             })
             return token.data.status
         }
-        
-        const token = await getToken()
-        console.log(token);
-        if (token == false) {
-            history.push('/')
-            return
+        const auth = async() =>{
+            const token = await getToken()
+            console.log(token);
+            if (token == false) {
+                history.push('/')
+                return
+            }
         }
+
+        auth()
+        
         socket.emit('join', roomid)
 
         let peer 
@@ -77,10 +83,10 @@ const Sender = () => {
             console.log(message);
         })
 
-        socket.on('offer',(payload)=>{
+        socket.on('offer',async(payload)=>{
             console.log('offer');
             const desc = new RTCSessionDescription(payload.sdp);
-            peer.setRemoteDescription(desc).catch(e => console.log(e));
+            await peer.setRemoteDescription(desc).catch(e => console.log(e));
         })
        
 

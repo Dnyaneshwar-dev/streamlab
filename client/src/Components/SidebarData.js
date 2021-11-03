@@ -13,13 +13,13 @@ export const SidebarData = [
   },
   {
     title: 'CREATE',
-    path: '/auditorium',
+    path: '/create',
     icon: <GiIcons.GiTheater />,
     cName: 'nav-text'
   },
   {
     title: 'JOIN',
-    path: '/join',
+    path: '/joinroom',
     icon: <GiIcons.GiTeamIdea />,
     cName: 'nav-text'
   },

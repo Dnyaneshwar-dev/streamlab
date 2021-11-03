@@ -1,7 +1,12 @@
 const config = {
     iceServers: [
         {
-            urls: "stun:192.168.43.241:3478"
+            'urls': [
+                'stun:stun.l.google.com:19302',
+                'stun:stun1.l.google.com:19302',
+                'stun:stun2.l.google.com:19302',
+                'stun:stun.l.google.com:19302?transport=udp',
+            ]
         }
     ]
 }

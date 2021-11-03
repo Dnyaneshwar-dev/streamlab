@@ -15,6 +15,7 @@ import Box from '@mui/material/Box'
 import {Widget, addResponseMessage, addLinkSnippet, addUserMessage, setQuickButtons} from 'react-chat-widget';
 import { useEffect } from 'react'
 import { socket } from './socketConnection'
+import adapter from 'webrtc-adapter';
 
 const ReceiverSidebar = (props) => {
     const p = new URLSearchParams(window.location.hash.substring(6))
