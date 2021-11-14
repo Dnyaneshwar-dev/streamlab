@@ -5,9 +5,9 @@ import { useEffect } from 'react'
 import { useRef } from 'react';
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux';
-import { PAYLOAD, VIDEOSTREAM } from './redux/actions';
+import { PAYLOAD, VIDEOSTREAM } from '../redux/actions';
 import ReactPlayer from 'react-player' 
-import { store } from './redux/store'
+import { store } from '../redux/store'
 import config from './config';
 import { socket } from './socketConnection';
 import { useHistory } from 'react-router-dom';

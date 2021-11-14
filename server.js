@@ -4,9 +4,17 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const webrtc = require("wrtc");
 const { config } = require('./config')
-
+const { setToken } = require('./auth/auth')
+const redis = require('redis');
 const socket = require('socket.io')
+const bcrypt = require('bcrypt');
+const redisClient = redis.createClient({
+    host:'localhost',
+    port: 6379
+})
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors())
 app.use(express.static('public'));
@@ -58,16 +66,43 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //     res.json(payload);
 // });
 
-function handleTrackEvent(e, peer) {
-    senderStream["abc"] = e.streams[0];
-};
-
-function handleScreenTrackEvent(e,peer){
-    screens["abc"] = e.streams[0]
-}
-
 
 const server = app.listen(5000, () => console.log('server started'));
+
+// auth
+app.post('/auth', async(req, res) => {
+    const { roomid, passcode } = req.body
+    redisClient.get(roomid,(err, reply) => {
+        if(err) {
+            console.log(err);
+        }
+        if(reply) {
+            reply = JSON.parse(reply)
+            if(reply.passcode == passcode) {
+                res.json({
+                    status: true,
+                    message: "success"
+                })
+            } else {
+                res.json({
+                    status: false,
+                    message: "wrong passcode"
+                })
+            }
+        } else {
+            res.json({
+                status: false,
+                message: "room not found"
+            })
+        }
+    })
+});
+
+app.post('/room',async(req,res)=>{
+    const { roomid } = req.body
+    redisClient.setex(roomid,86400,JSON.stringify(req.body))
+    res.send({message:"done"})
+})
 
 const io = require("socket.io")(server);
 
@@ -81,15 +116,27 @@ const io = require("socket.io")(server);
 let senderStream = new Map()
 let screens = new Map()
 
-io.on('connection',(client) =>{
+
+function handleTrackEvent(e, peer,roomid) {
+    senderStream[roomid] = e.streams[0];
     
-    client.on('join', (roomid) =>{
-        
-        client.join(roomid) 
+};
+
+function handleScreenTrackEvent(e, peer, roomid) {
+    screens[roomid] = e.streams[0]
+}
+
+
+
+io.on('connection', (client) => {
+
+    client.on('join', (roomid) => {
+
+        client.join(roomid)
 
     })
 
-    client.on('getvideostream',async(e)=>{
+    client.on('getvideostream', async (e) => {
         const peer = new webrtc.RTCPeerConnection(config);
         const desc = new webrtc.RTCSessionDescription(e.body.sdp);
         await peer.setRemoteDescription(desc);
@@ -98,17 +145,21 @@ io.on('connection',(client) =>{
         } catch (error) {
             console.log(error);
         }
+
         const answer = await peer.createAnswer();
         await peer.setLocalDescription(answer);
         const payload = {
             sdp: peer.localDescription
         }
 
-        io.in(e.roomid).emit('videostream',{payload:payload})
-        
+        setTimeout(() => {
+            io.in(e.roomid).emit('videostream', { payload: payload })
+        }, 2000);
+       
+
     })
 
-    client.on('getscreen',async(e)=>{
+    client.on('getscreen', async (e) => {
         const peer = new webrtc.RTCPeerConnection(config);
         const desc = new webrtc.RTCSessionDescription(e.body.sdp);
         await peer.setRemoteDescription(desc);
@@ -122,17 +173,19 @@ io.on('connection',(client) =>{
         const payload = {
             sdp: peer.localDescription
         }
-
-        io.in(e.roomid).emit('screenstream',{payload:payload})
+        setTimeout(() => {
+            io.in(e.roomid).emit('screenstream', { payload: payload })
+        }, 2000);
         
+
     })
 
 
-    client.on('publishstream',async({ roomid, payload }) =>{
+    client.on('publishstream', async ({ roomid, payload }) => {
 
         const peer = new webrtc.RTCPeerConnection(config);
-  
-        peer.ontrack = (e) => handleTrackEvent(e, peer);
+
+        peer.ontrack = (e) => handleTrackEvent(e, peer, roomid);
         const desc = new webrtc.RTCSessionDescription(payload.sdp);
         await peer.setRemoteDescription(desc);
         const answer = await peer.createAnswer();
@@ -140,16 +193,16 @@ io.on('connection',(client) =>{
         const payload2 = {
             sdp: peer.localDescription
         }
-        client.broadcast.to(roomid).emit('alert',{message:"reload"})
-        io.in(roomid).emit('offer',payload2)
+        client.broadcast.to(roomid).emit('alert', { message: "reload" })
+        io.in(roomid).emit('offer', payload2)
     })
 
 
-    client.on('publishscreen',async({ roomid, payload }) =>{
+    client.on('publishscreen', async ({ roomid, payload }) => {
 
         const peer = new webrtc.RTCPeerConnection(config);
-  
-        peer.ontrack = (e) => handleScreenTrackEvent(e, peer);
+
+        peer.ontrack = (e) => handleScreenTrackEvent(e, peer, roomid);
         const desc = new webrtc.RTCSessionDescription(payload.sdp);
         await peer.setRemoteDescription(desc);
         const answer = await peer.createAnswer();
@@ -157,18 +210,22 @@ io.on('connection',(client) =>{
         const payload2 = {
             sdp: peer.localDescription
         }
+
+        io.in(roomid).emit('screenoffer', payload2)
+        setTimeout(() => {
+            client.broadcast.to(roomid).emit('screenalert', { message: "Screen Is begin presented" })
+        }, 2000);
         
-        io.in(roomid).emit('screenoffer',payload2)
-        client.broadcast.to(roomid).emit('screenalert',{ message : "Screen Is begin presented"})
     })
 
-    client.on('chat',(e) =>{
-        client.broadcast.to(e.roomid).emit('hi',{message:e.message})
+    client.on('chat', (e) => {
+        client.broadcast.to(e.roomid).emit('hi', { message: e.message })
     })
 
 
-    client.on('message',({message, roomid})=>{
-        client.broadcast.to(roomid).emit('newmessage',{message:message})
+    client.on('message', ({ name, message, roomid }) => {
+        console.log(name);
+        client.broadcast.to(roomid).emit('newmessage', { name:name, message: message })
     })
 
 })

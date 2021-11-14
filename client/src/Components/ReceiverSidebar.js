@@ -22,8 +22,9 @@ const ReceiverSidebar = (props) => {
     const roomid = p.get('roomid')
     
     const handleNewUserMessage = newMessage => {
-
-        socket.emit('message', {message:newMessage, roomid:roomid});
+        const name = sessionStorage.getItem('name')
+        console.log(name)
+        socket.emit('message', { name:name, message:newMessage, roomid:roomid});
 
         // console.log(`New message incoming! ${newMessage}`);
         // Now send the message throught the backend API
@@ -32,8 +33,9 @@ const ReceiverSidebar = (props) => {
 
     useEffect(()=>{
        
-        socket.on('newmessage',({message})=>{
-            addResponseMessage(String(message))
+        socket.on('newmessage',({name, message})=>{
+           
+            addResponseMessage(`${name}: ${message}`)
         })
 
     },[])

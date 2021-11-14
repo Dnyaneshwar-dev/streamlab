@@ -10,14 +10,16 @@ import config from './config';
 import 'react-chat-widget/lib/styles.css';
 import { useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
 import adapter from 'webrtc-adapter';
+
 
 const Receiver = () => {
     const history = useHistory();
     const senderVideo = useRef(null)
-    const [data, setLoad] = useState({})
     const senderScreen = useRef(null)
 
+    const [loaded,setLoad] = useState(true)
 
 
 
@@ -26,7 +28,10 @@ const Receiver = () => {
 
         const roomid = p.get('roomid')
         const passcode = p.get('passcode')
+        const name = p.get('name')
+        localStorage.setItem('name',name)
         console.log(roomid,passcode);
+
         const getToken = async () => {
             const token = await axios.post('http://localhost:5000/auth', {
 
@@ -132,7 +137,9 @@ const Receiver = () => {
             const desc = new RTCSessionDescription(e.payload.sdp);
             //await peer.setRemoteDescription(desc).catch(e => console.log(e));
             setTimeout(async() => { await peer.setRemoteDescription(desc).catch(e => console.log(e));
+                setLoad(false)
             }, 3000);
+
         })
 
         socket.on('screenstream', async(e) => {
@@ -145,9 +152,9 @@ const Receiver = () => {
             
         })
 
-        socket.on('screenalert', (e) => {
+        socket.on('screenalert', async(e) => {
             console.log(e.message);
-            setScreen()
+            await setScreen()
         })
 
         socket.on('videoalert', (e) => {
@@ -158,12 +165,20 @@ const Receiver = () => {
 
     return (
         <div>
-
+            {
+                loaded ?  <Box className="mx-auto" sx={{ margin:"auto", paddingTop:"10%", display:"flex-box" }}>
+                <div className="text-center">
+                <CircularProgress disableShrink/>
+                <h3 className="text-center">Loading Please Wait...</h3>
+                </div>
+                
+              </Box> : <></>
+            } 
             <ReceiverSidebar open="false" />
-
-            <video ref={senderVideo} autoPlay={true} muted={true} playsInline={true} controls={true} />
-            <video ref={senderScreen} autoPlay={true} muted={true} playsInline={true} controls={true} />
-
+        
+            <video ref={senderVideo} autoPlay={true} muted={true} playsInline={true} controls={false} />
+            <video ref={senderScreen} autoPlay={true} muted={true} playsInline={true} controls={false} />
+            
         </div>
     );
 }

@@ -23,7 +23,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Tooltip from '@mui/material/Tooltip';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useEffect } from 'react'
-import { store } from './redux/store'
+import { store } from '../redux/store'
 import { useState } from 'react'
 import { socket } from './socketConnection'
 import config from './config'
@@ -33,7 +33,7 @@ const SenderSidebar = (props) => {
     const passcode = p.get('passcode')
     const handleNewUserMessage = newMessage => {
 
-        socket.emit('message', { message: newMessage, roomid: roomid });
+        socket.emit('message', { name: 'host', message: newMessage, roomid: roomid });
 
         // console.log(`New message incoming! ${newMessage}`);
         // Now send the message throught the backend API
@@ -82,8 +82,8 @@ const SenderSidebar = (props) => {
             await screenpeer.setRemoteDescription(desc).catch(e => console.log(e));
         })
 
-        socket.on('newmessage', ({ message }) => {
-            addResponseMessage(message)
+        socket.on('newmessage', ({ name, message }) => {
+            addResponseMessage(`${name}: ${message}`)
         })
 
     }, [])

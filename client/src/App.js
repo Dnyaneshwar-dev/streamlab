@@ -1,7 +1,7 @@
 
 import React from 'react';
-import Receiver from './Receiver'
-import Sender from './Sender';
+import Receiver from './Components/Receiver'
+import Sender from './Components/Sender';
 import Create from './Pages/Create';
 import Join from './Pages/Join';
 import Home from './Pages/Home';
@@ -10,7 +10,7 @@ import './App.css'
 import { Provider } from 'react-redux';
 import { useParams } from 'react-router';
 import { HashRouter, Switch, Route, Router } from 'react-router-dom';
-import Chat from './Chat';
+import Chat from './Components/Chat';
 import axios from 'axios';
 import Navbar from './Components/Navbar';
 
@@ -24,7 +24,6 @@ function App() {
         <Route path='/' exact component={Home} />
         <Route path='/create' component={Create} />
         <Route path='/joinroom' component={Join} />
-
         <Route exact path='/host' component={Sender} />
         <Route exact path='/join' component={Receiver} />
         <Route exact path='/chat' component={Chat} />
