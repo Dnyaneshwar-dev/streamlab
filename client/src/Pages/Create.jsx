@@ -23,6 +23,7 @@ function Create() {
           passcode:passcode,
           roomid:id
       })
+      sessionStorage.setItem('hostname', String(hostname))
       history.push(`/host?roomid=${id}&passcode=${passcode}`)
   }
   useEffect(() => {

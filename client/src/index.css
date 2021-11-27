@@ -33,3 +33,8 @@ code {
   overflow-y: hidden;
   overflow-x: hidden;
 }
+
+.mainbtn{
+  width: 200px;
+  height: 50px;
+}

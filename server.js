@@ -6,6 +6,8 @@ const webrtc = require("wrtc");
 const { config } = require('./config')
 const { setToken } = require('./auth/auth')
 const redis = require('redis');
+const path = require('path')
+
 const socket = require('socket.io')
 const bcrypt = require('bcrypt');
 const redisClient = redis.createClient({
@@ -17,7 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors())
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'client/public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -103,6 +106,11 @@ app.post('/room',async(req,res)=>{
     redisClient.setex(roomid,86400,JSON.stringify(req.body))
     res.send({message:"done"})
 })
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/client/build/index.html'));
+});
+
 
 const io = require("socket.io")(server);
 

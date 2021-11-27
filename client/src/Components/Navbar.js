@@ -20,7 +20,8 @@ function Navbar() {
           <Link to='#' className='menu-bars h-100'>
             <FaIcons.FaBars onClick={showSidebar} height="100px"/>
           </Link>
-          <img src={brand} alt='brand' className='brand menu-bars' width="100px" height="70px" className=""/>
+          
+          <img src={brand} alt='brand' className='brand menu-bars' width="100px" height="70px" align="right"/>
         </div>
         
         <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>

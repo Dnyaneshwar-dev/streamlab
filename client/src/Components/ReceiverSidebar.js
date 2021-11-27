@@ -23,7 +23,6 @@ const ReceiverSidebar = (props) => {
     
     const handleNewUserMessage = newMessage => {
         const name = sessionStorage.getItem('name')
-        console.log(name)
         socket.emit('message', { name:name, message:newMessage, roomid:roomid});
 
         // console.log(`New message incoming! ${newMessage}`);

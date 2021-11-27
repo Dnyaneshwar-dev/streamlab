@@ -5,6 +5,7 @@ import Sender from './Components/Sender';
 import Create from './Pages/Create';
 import Join from './Pages/Join';
 import Home from './Pages/Home';
+import Error from './Pages/Error';
 import store from './redux/store';
 import './App.css'
 import { Provider } from 'react-redux';
@@ -27,7 +28,8 @@ function App() {
         <Route exact path='/host' component={Sender} />
         <Route exact path='/join' component={Receiver} />
         <Route exact path='/chat' component={Chat} />
-        <Route component={() => <h1> Hello </h1>} />
+        <Route exact path="/error" component={Error} />
+        <Route component={Error} />
       </Switch>
     </HashRouter>
 

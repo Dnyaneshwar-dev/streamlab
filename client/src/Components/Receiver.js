@@ -11,6 +11,8 @@ import 'react-chat-widget/lib/styles.css';
 import { useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
+import video from '../images/video.svg'
+import screen from '../images/screen.svg'
 import adapter from 'webrtc-adapter';
 
 
@@ -18,20 +20,12 @@ const Receiver = () => {
     const history = useHistory();
     const senderVideo = useRef(null)
     const senderScreen = useRef(null)
-
-    const [loaded,setLoad] = useState(true)
-
-
-
     useEffect(() => {
         const p = new URLSearchParams(window.location.hash.substring(6))
 
         const roomid = p.get('roomid')
         const passcode = p.get('passcode')
-        const name = p.get('name')
-        localStorage.setItem('name',name)
-        console.log(roomid,passcode);
-
+        
         const getToken = async () => {
             const token = await axios.post('http://localhost:5000/auth', {
 
@@ -45,7 +39,7 @@ const Receiver = () => {
             const token = await getToken()
             console.log(token);
             if (token == false) {
-                history.push('/')
+                history.push('/error')
                 return
             }
         }
@@ -137,7 +131,6 @@ const Receiver = () => {
             const desc = new RTCSessionDescription(e.payload.sdp);
             //await peer.setRemoteDescription(desc).catch(e => console.log(e));
             setTimeout(async() => { await peer.setRemoteDescription(desc).catch(e => console.log(e));
-                setLoad(false)
             }, 3000);
 
         })
@@ -148,6 +141,7 @@ const Receiver = () => {
             const desc = new RTCSessionDescription(e.payload.sdp);
 
             setTimeout(async() => { await peer2.setRemoteDescription(desc).catch(e => console.log(e));
+                
             }, 3000);
             
         })
@@ -161,23 +155,31 @@ const Receiver = () => {
 
         })
 
+        setScreen()
+
     }, [])
 
     return (
         <div>
-            {
-                loaded ?  <Box className="mx-auto" sx={{ margin:"auto", paddingTop:"10%", display:"flex-box" }}>
-                <div className="text-center">
-                <CircularProgress disableShrink/>
-                <h3 className="text-center">Loading Please Wait...</h3>
-                </div>
-                
-              </Box> : <></>
-            } 
             <ReceiverSidebar open="false" />
-        
-            <video ref={senderVideo} autoPlay={true} muted={true} playsInline={true} controls={false} />
-            <video ref={senderScreen} autoPlay={true} muted={true} playsInline={true} controls={false} />
+
+            
+            <center>
+                <video ref={senderVideo}  autoPlay={true} muted={true} playsInline={true} controls={true} />
+            </center>  
+
+            {/* <center>
+                <img src={video} className="mt-5" align="center" width="150px" height="150px" style={videoloaded ? {display: 'none'} : {display: 'block'} }></img>
+            </center>
+             */}
+            <center>
+                <audio ref={senderScreen} autoPlay={true} muted={true} playsInline={true} controls={true} />
+            </center>
+            
+            {/* <center>
+                <img src={screen} className="mt-5" style={screenloaded ?{display: 'none'} : {display: 'block'}}  align="center" width="150px" height="150px"></img>
+            </center>
+             */}
             
         </div>
     );

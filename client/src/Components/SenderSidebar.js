@@ -27,13 +27,17 @@ import { store } from '../redux/store'
 import { useState } from 'react'
 import { socket } from './socketConnection'
 import config from './config'
+import { useDispatch, useSelector } from 'react-redux';
+import { PAYLOAD, VIDEOSTREAM } from '../redux/actions';
+
 const SenderSidebar = (props) => {
+    const dispatch = useDispatch()
     const p = new URLSearchParams(window.location.hash.substring(6))
     const roomid = p.get('roomid')
     const passcode = p.get('passcode')
     const handleNewUserMessage = newMessage => {
-
-        socket.emit('message', { name: 'host', message: newMessage, roomid: roomid });
+        const host = sessionStorage.getItem('hostname')
+        socket.emit('message', { name: host, message: newMessage, roomid: roomid });
 
         // console.log(`New message incoming! ${newMessage}`);
         // Now send the message throught the backend API
@@ -41,11 +45,11 @@ const SenderSidebar = (props) => {
     };
 
 
-
+    let screen
     let screenpeer
     async function shareScreen() {
-        const screen = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-
+        screen = await navigator.mediaDevices.getUserMedia({ audio: true })
+        dispatch({ type: VIDEOSTREAM, data: screen })
         screenpeer = createPeer()
 
         screen.getTracks().forEach(track => screenpeer.addTrack(track, screen))
@@ -76,6 +80,7 @@ const SenderSidebar = (props) => {
         stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
     }
     useEffect(() => {
+        shareScreen()
         socket.on('screenoffer', async (payload) => {
             console.log('screenoffer');
             const desc = new RTCSessionDescription(payload.sdp);
@@ -118,7 +123,7 @@ const SenderSidebar = (props) => {
                                 
                            
                         <Button onClick={() => {
-                            shareScreen();
+                            // shareScreen();
                         }}>
                             <ScreenShareOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
@@ -137,7 +142,7 @@ const SenderSidebar = (props) => {
                             }
                         </Button>
                     </Box>
-                    <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
+                    {/* <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
                         
                         <Button onClick={() => {
                             const stream = store.getState().commonReducer.videostream
@@ -149,11 +154,11 @@ const SenderSidebar = (props) => {
                                 video ? <VideocamOutlinedIcon sx={{ color: "red", fontSize: 35 }} /> : <VideocamOffOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                             }
                         </Button>
-                    </Box>
+                    </Box> */}
 
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
-                        <CopyToClipboard text={`${window.location.protocol}//${window.location.hostname}/#/join?roomid=${roomid}&passcode=${passcode}`}>
-                            <Tooltip title="Copy Joining Link" aria-label="share" >
+                        <CopyToClipboard text={`Room ID : ${roomid} \n Passcode : ${passcode}`}>
+                            <Tooltip title="Copy Joining Info" aria-label="share" >
                                 <Button className="btn btn-outline-light" id="icons" > <ContentCopyIcon /></Button>
                             </Tooltip>
                         </CopyToClipboard>

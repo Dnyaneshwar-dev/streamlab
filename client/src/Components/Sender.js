@@ -39,7 +39,7 @@ const Sender = () => {
             const token = await getToken()
             console.log(token);
             if (token == false) {
-                history.push('/')
+                history.push('/error')
                 return
             }
         }
@@ -51,10 +51,14 @@ const Sender = () => {
         let peer 
 
         const getMedia = async () => {
-
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
+            // video: {
+            //     width: 1280,
+            //     height: 720
+            // }
+            const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video:true
+             })
             videoRef.current.srcObject = stream
-            dispatch({ type: VIDEOSTREAM, data: stream })
+            
             peer = createPeer()
 
             stream.getTracks().forEach(track => peer.addTrack(track,stream))
@@ -97,8 +101,10 @@ const Sender = () => {
         <div>
 
             <SenderSidebar open="false" />
-
-            <video ref={videoRef} id="video" autoPlay={true} muted controls={false} />
+            <center>
+                <video ref={videoRef} id="video" muted autoPlay={true} />
+            </center>
+           
 
     
         </div>
