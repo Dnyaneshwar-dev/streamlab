@@ -12,32 +12,33 @@ import Container from '@mui/material/Container';
 import ScreenSearchDesktopOutlinedIcon from '@mui/icons-material/ScreenSearchDesktopOutlined';
 import LinkedCameraOutlinedIcon from '@mui/icons-material/LinkedCameraOutlined';
 import Box from '@mui/material/Box'
-import MicNoneIcon from '@mui/icons-material/MicNone';
-import MicOffIcon from '@mui/icons-material/MicOff';
-import ScreenShareOutlinedIcon from '@mui/icons-material/ScreenShareOutlined';
-import VideocamOffOutlinedIcon from '@mui/icons-material/VideocamOffOutlined';
-import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
+import {Widget, addResponseMessage, addLinkSnippet, addUserMessage, setQuickButtons} from 'react-chat-widget';
 import { useEffect } from 'react'
-import { store } from './redux/store'
-import { useState } from 'react'
+import { socket } from './socketConnection'
+import adapter from 'webrtc-adapter';
 
+const ReceiverSidebar = (props) => {
+    const p = new URLSearchParams(window.location.hash.substring(6))
+    const roomid = p.get('roomid')
+    
+    const handleNewUserMessage = newMessage => {
+        const name = sessionStorage.getItem('name')
+        socket.emit('message', { name:name, message:newMessage, roomid:roomid});
 
-const SenderSidebar = (props) => {
+        // console.log(`New message incoming! ${newMessage}`);
+        // Now send the message throught the backend API
+        // addResponseMessage('hi')
+    };
 
-    const handleMic = (stream) =>{
-        stream.getAudioTracks()[0].enabled = !(stream.getAudioTracks()[0].enabled);
-    }
-
-    const handleVideo = (stream) =>{
-        stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
-    }
     useEffect(()=>{
-        
+       
+        socket.on('newmessage',({name, message})=>{
+           
+            addResponseMessage(`${name}: ${message}`)
+        })
+
     },[])
-
-    const [video,toggleVideo] = useState(true)
-    const [mic,toggleMic] = useState(true)
-
+    
     return (
         <>
             <Drawer anchor='right' variant='permanent'
@@ -47,8 +48,9 @@ const SenderSidebar = (props) => {
                     '& .MuiDrawer-paper': {
                         width: 70,
                         boxSizing: 'border-box',
-                    }
+                    },
                 }}
+                className='side'
                 openSecondary={true}
                 open={props.open}
             >
@@ -74,34 +76,22 @@ const SenderSidebar = (props) => {
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
 
                         <Button>
-                            <ScreenShareOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
+                            <ScreenSearchDesktopOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
                     </Box>
                     <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
 
-                        <Button onClick={()=>{
-                            const stream = store.getState().commonReducer.videostream
-                            console.log(stream);
-                            handleMic(stream)
-                            toggleMic(!mic)
-                        }}>
-                        {
-                            mic ? <MicNoneIcon sx={{ color: "red", fontSize: 35 }} />:<MicOffIcon sx={{ color: "black", fontSize: 35 }} />
-                        }  
+                        <Button>
+                            <LinkedCameraOutlinedIcon sx={{ color: "black", fontSize: 35 }} />
                         </Button>
                     </Box>
-                    <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
 
-                        <Button onClick={()=>{
-                            const stream = store.getState().commonReducer.videostream
-                            console.log(stream);
-                            handleVideo(stream)
-                            toggleVideo(!video)
-                        }}>
-                        {
-                            video ? <VideocamOutlinedIcon sx={{ color: "red", fontSize: 35 }} /> : <VideocamOffOutlinedIcon sx={{ color: "black", fontSize: 35 }}/>
-                        }
-                        </Button>
+                    <Box sx={{ display: 'flex', textAlign: "center", height: "70px", width: "70px" }}>
+                        <Widget
+                            handleNewUserMessage={handleNewUserMessage}
+                            title="Chat"
+                            subtitle=""
+                        />
                     </Box>
                 </Stack>
             </Drawer>
@@ -109,4 +99,4 @@ const SenderSidebar = (props) => {
     )
 }
 
-export default SenderSidebar
+export default ReceiverSidebar
