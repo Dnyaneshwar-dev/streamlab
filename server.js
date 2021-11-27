@@ -10,10 +10,15 @@ const path = require('path')
 
 const socket = require('socket.io')
 const bcrypt = require('bcrypt');
+
 const redisClient = redis.createClient({
-    host:'localhost',
-    port: 6379
+   host:'localhost',
+   port: 6379
 })
+
+redisClient.on('error', err => {
+    console.log('Error ' + err);
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
