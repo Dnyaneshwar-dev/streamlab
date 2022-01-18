@@ -3,3 +3,9 @@
 
 
 ### Project Report Link: https://drive.google.com/file/d/10vkTYpFL7TqE-zZJNYxNAZVsyKbKNnk0/view?usp=sharing
+
+## Tools and Technologies Used
+  - React.js
+  - Node.js
+  - Redis
+  - WebRTC
